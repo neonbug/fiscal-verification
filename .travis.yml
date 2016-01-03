@@ -8,7 +8,6 @@ php:
   - 7.0
   - hhvm
 
-install:
-  - travis_retry composer update $COMPOSER_OPTS
+install: composer update
 
-script: phpunit --coverage-text tests
+script: ./vendor/bin/phpunit --bootstrap vendor/autoload.php --coverage-text tests
