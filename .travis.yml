@@ -11,4 +11,4 @@ php:
 install:
   - travis_retry composer update $COMPOSER_OPTS
 
-script: phpunit --coverage-text
+script: phpunit --coverage-text tests
