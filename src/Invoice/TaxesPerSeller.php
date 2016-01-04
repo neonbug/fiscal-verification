@@ -82,6 +82,7 @@ class TaxesPerSeller
     /**
      * Create a new TaxesPerSeller instance
      */
-    public function __construct() {
+    public function __construct()
+    {
     }
 }
