@@ -32,6 +32,13 @@ Afterwards, open a terminal, navigate to the project's folder and run
 $ composer test
 ```
 
+## TODO
+
+- more tests
+- better error handling
+- implement batch invoives (i.e. /v1/cash_registers_batch/invoices)
+- a (more robust) system for retrying requests
+
 ## Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
