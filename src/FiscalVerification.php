@@ -640,10 +640,13 @@ class FiscalVerification
         
         $response = curl_exec($ch);
         if ($response === false) {
-            echo 'Curl error: [' . curl_errno($ch) . '] ' . curl_error($ch);
-            $response = curl_exec($ch);
+            if (curl_errno($ch) == 35) { //handle "Unknown SSL protocol error in connection to" error
+                //let's simply retry, it usually solves this issue
+                $response = curl_exec($ch);
+            }
+            
             if ($response === false) {
-                throw new \Exception('Curl error: [' . curl_errno($ch) . '] ' . curl_error($ch));
+                throw new \Exception('Curl error', 1, new \Exception(curl_error($ch), curl_errno($ch)));
             }
         }
         
