@@ -18,8 +18,17 @@ class InvoiceTest extends \PHPUnit_Framework_TestCase
         $invoice_amount       = 30.41123123;
         $operator_tax_number  = $tax_number;
         $payment_amount       = 11.23123123;
-        $protected_id         = '886c58ce543c5eb7ed64a2a65ab65843';
         $customer_vat_number  = '12345677';
+        
+        $zoi = $fiscal_verification->generateZoi(
+            $tax_number,
+            $issue_date_time,
+            $business_premise_id,
+            $electronic_device_id,
+            $invoice_number,
+            $invoice_amount
+        );
+        $protected_id = $fiscal_verification->signZoi($zoi);
         
         $taxes_per_seller = new \Neonbug\FiscalVerification\Invoice\TaxesPerSeller();
         $taxes_per_seller->vat = array(
