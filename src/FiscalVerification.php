@@ -662,7 +662,11 @@ class FiscalVerification
                 $this->emitEvent('fiscal-verification.after-repeat-send', $response);
             
             if ($response === false) {
-                throw new \Exception('Curl error', 1, new \Exception(curl_error($ch), curl_errno($ch)));
+                $error = new \Exception('Curl error', 1, new \Exception(curl_error($ch), curl_errno($ch)));
+                
+                $this->emitEvent('fiscal-verification.after-send-error', $error);
+                
+                throw $error;
             }
         }
         
