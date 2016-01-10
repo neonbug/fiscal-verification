@@ -34,10 +34,11 @@ $ composer test
 
 ## TODO
 
-- more tests
-- better error handling
-- implement batch invoives (i.e. /v1/cash_registers_batch/invoices)
-- a (more robust) system for retrying requests
+- more tests, 
+- better error handling, 
+- implement batch invoives (i.e. /v1/cash_registers_batch/invoices), 
+- implement ReferenceInvoice and ReferenceSalesBook attributes, 
+- a (more robust) system for retrying requests.
 
 ## Contributing
 
