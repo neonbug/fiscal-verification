@@ -26,6 +26,8 @@ class FiscalVerification
     protected $ca_public_key_filename;
     protected $base_url;
     
+    protected $event_emitter;
+    
     /**
      * Create a new FiscalVerification instance
      *
@@ -44,6 +46,15 @@ class FiscalVerification
         $this->client_key_password    = $client_key_password;
         $this->ca_public_key_filename = $ca_public_key_filename;
         $this->base_url               = $base_url;
+    }
+    
+    /**
+     * Add an external event emitter
+     * @param \Evenement\EventEmitterInterface $event_emitter Event emmiter
+     */
+    public function setEventEmitter(\Evenement\EventEmitterInterface $event_emitter)
+    {
+        $this->event_emitter = $event_emitter;
     }
     
     /**
@@ -606,6 +617,8 @@ class FiscalVerification
         $ca_public_key_filename,
         $message
     ) {
+        $this->emitEvent('fiscal-verification.before-send', $message);
+        
         $ch = curl_init();
         
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -639,11 +652,14 @@ class FiscalVerification
         curl_setopt($ch, CURLOPT_POSTFIELDS, (!is_string($message) ? json_encode($message) : $message));
         
         $response = curl_exec($ch);
+        $this->emitEvent('fiscal-verification.after-send', $response);
+        
         if ($response === false) {
             if (curl_errno($ch) == 35) { //handle "Unknown SSL protocol error in connection to" error
                 //let's simply retry, it usually solves this issue
                 $response = curl_exec($ch);
             }
+                $this->emitEvent('fiscal-verification.after-repeat-send', $response);
             
             if ($response === false) {
                 throw new \Exception('Curl error', 1, new \Exception(curl_error($ch), curl_errno($ch)));
@@ -681,5 +697,14 @@ class FiscalVerification
             'payload'   => \Base64Url\Base64Url::decode($arr[1]),
             'signature' => \Base64Url\Base64Url::decode($arr[2])
         );
+    }
+    
+    protected function emitEvent($event, $message)
+    {
+        if ($this->event_emitter == null) {
+            return;
+        }
+        
+        $this->event_emitter->emit($event, array($message));
     }
 }
