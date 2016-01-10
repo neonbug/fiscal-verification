@@ -101,6 +101,8 @@ class RegisterPremiseTest extends \PHPUnit_Framework_TestCase
         $validation = validateAgainstSchema('FiscalVerificationSchema.json', $premise_response);
         $this->assertTrue($validation['valid'], 'Errors during validation: ' . print_r($validation['errors'], true));
         
+        // close the premise we just opened
+        
         $close_premise = true;
         
         // step 2: generate request
