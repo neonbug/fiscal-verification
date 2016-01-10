@@ -655,11 +655,11 @@ class FiscalVerification
         $this->emitEvent('fiscal-verification.after-send', $response);
         
         if ($response === false) {
-            if (curl_errno($ch) == 35) { //handle "Unknown SSL protocol error in connection to" error
+            //if (curl_errno($ch) == 35) { //handle "Unknown SSL protocol error in connection to" error
                 //let's simply retry, it usually solves this issue
                 $response = curl_exec($ch);
-            }
                 $this->emitEvent('fiscal-verification.after-repeat-send', $response);
+            //}
             
             if ($response === false) {
                 $error = new \Exception('Curl error', 1, new \Exception(curl_error($ch), curl_errno($ch)));
