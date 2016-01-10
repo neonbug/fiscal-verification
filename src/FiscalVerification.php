@@ -241,7 +241,7 @@ class FiscalVerification
      * @param string $invoice_number       Number of the invoice (sequence number of the invoice)
      * @param float  $invoice_amount       Value of the invoice (with VAT and discounts)
      *
-     * @return string                       Generated ZOI
+     * @return string                      Generated ZOI
      */
     public function generateZoi(
         $tax_number,
