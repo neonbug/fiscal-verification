@@ -1,6 +1,6 @@
 <?php namespace Neonbug\FiscalVerification\Tests;
 
-class EchoTest extends \PHPUnit_Framework_TestCase
+class GeneralTest extends \PHPUnit_Framework_TestCase
 {
     
     protected function checkConfig($config)
