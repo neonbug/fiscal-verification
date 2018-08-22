@@ -406,7 +406,7 @@ class FiscalVerification
         $business_premise_id,
         $validity_date,
         BusinessPremise $business_premise,
-        Array $software_suppliers,
+        array $software_suppliers,
         $special_notes = '',
         $close_premise = false,
         $encode = true
