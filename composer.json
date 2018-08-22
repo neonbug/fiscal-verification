@@ -15,7 +15,6 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "j20/php-uuid": "dev-master",
         "endroid/qr-code": "^1.9.3",
         "spomky-labs/base64url": "^1.0.1",
         "evenement/evenement": "1.0.*"
