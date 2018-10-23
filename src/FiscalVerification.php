@@ -69,6 +69,9 @@ class FiscalVerification
         Invoice $invoice,
         $encode = true
     ) {
+        // set date format for all invoice related stuff
+        $invoice->setDateTimeFormat(self::MESSAGE_HEADER_DATETIME_FORMAT);
+
         $data = array(
             'InvoiceRequest' => array(
                 'Header' => array(
@@ -77,11 +80,11 @@ class FiscalVerification
                 )
             )
         );
-        
+
         $key = '';
         if ($invoice instanceof ElectronicInvoice) {
             $key = 'Invoice';
-            
+
             $data['InvoiceRequest'][$key] = array(
                 'InvoiceIdentifier' => array(
                     'InvoiceNumber'      => $invoice->invoice_number,
@@ -188,49 +191,27 @@ class FiscalVerification
                 }
                 $taxes_per_seller_arr['FlatRateCompensation'] = $formatted_arr;
             }
-            
+
             $taxes_per_seller[] = $taxes_per_seller_arr;
         }
-        
+
         $data['InvoiceRequest'][$key]['TaxesPerSeller'] = $taxes_per_seller;
-        
-        /*
-        there should be multiple of these:
-        
-        if ($invoice->reference_invoice_invoice_number != null &&
-            $invoice->reference_invoice_business_premise_id != null &&
-            $invoice->reference_invoice_electronic_device_id != null &&
-            $invoice->reference_invoice_issue_date_time != null) {
-            
-            $data['InvoiceRequest'][$key]['ReferenceInvoice']['ReferenceInvoiceIdentifier'] = array(
-                'InvoiceNumber'      => $invoice->reference_invoice_invoice_number,
-                'BusinessPremiseID'  => $invoice->reference_invoice_business_premise_id,
-                'ElectronicDeviceID' => $invoice->reference_invoice_electronic_device_id
-            );
-            
-            $data['InvoiceRequest'][$key]['ReferenceInvoice']['ReferenceInvoiceIssueDateTime'] =
-                $invoice->reference_invoice_issue_date_time;
+
+        // if invoice was referenced
+        $reference_invoices = $invoice->getReferenceInvoices() ;
+        if (! empty($reference_invoices)) {
+            $data['InvoiceRequest'][$key]['ReferenceInvoice'] = $reference_invoices;
         }
-        
-        if ($invoice->reference_sales_book_invoice_number != null &&
-            $invoice->reference_sales_book_business_premise_id != null &&
-            $invoice->reference_sales_book_electronic_device_id != null &&
-            $invoice->reference_sales_book_issue_date_time != null) {
-            
-            $data['InvoiceRequest'][$key]['ReferenceSalesBook']['ReferenceSalesBookIdentifier'] = array(
-                'InvoiceNumber'      => $invoice->reference_sales_book_invoice_number,
-                'BusinessPremiseID'  => $invoice->reference_sales_book_business_premise_id,
-                'ElectronicDeviceID' => $invoice->reference_sales_book_electronic_device_id
-            );
-            
-            $data['InvoiceRequest'][$key]['ReferenceSalesBook']['ReferenceSalesBookIssueDateTime'] =
-                $invoice->reference_sales_book_issue_date_time;
+
+        // if sales book was referenced
+        $reference_sales_books = $invoice->getReferenceSalesBooks() ;
+        if (! empty($reference_sales_books)) {
+            $data['InvoiceRequest'][$key]['ReferenceSalesBook'] = $reference_sales_books;
         }
-        */
-        
+
         return ($encode ? json_encode($data) : $data);
     }
-    
+
     /**
      * Generate ZOI
      *
