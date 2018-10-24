@@ -12,31 +12,31 @@ class ElectronicInvoice extends Invoice
      * @var int
      */
     public $business_premise_id;
-    
+
     /**
      * Mark of the electronic device
      * @var int
      */
     public $electronic_device_id;
-    
+
     /**
      * Date and time of issuing the invoice (unix timestamp)
      * @var int
      */
     public $issue_date_time;
-    
+
     /**
      * Tax number of the person (operator) at the electronic device
      * @var int
      */
     public $operator_tax_number;
-    
+
     /**
      * Protective mark of the invoice issuer
      * @var string
      */
     public $protected_id;
-    
+
     /**
      * Method for assigning the invoice
      *     Can be either C or B:
@@ -45,7 +45,7 @@ class ElectronicInvoice extends Invoice
      * @var string
      */
     public $numbering_structure;
-    
+
     /**
      * You enter "true" if the individual (operator), who issues the invoice with
      *     the usage of the electronic device, has no Slovene tax number,
@@ -53,7 +53,7 @@ class ElectronicInvoice extends Invoice
      * @var boolean
      */
     public $foreign_operator;
-    
+
     /**
      * Subsequently submitted invoices are invoices, which have been issued without
      *     the unique identification invoice mark – EOR (e.g. due to disconnections
@@ -63,7 +63,7 @@ class ElectronicInvoice extends Invoice
      * @var boolean
      */
     public $subsequent_submit;
-    
+
     /**
      * Create a new Invoice instance
      *
@@ -102,7 +102,7 @@ class ElectronicInvoice extends Invoice
             $payment_amount,
             $tax_number
         );
-        
+
         $this->business_premise_id  = $business_premise_id;
         $this->electronic_device_id = $electronic_device_id;
         $this->issue_date_time      = $issue_date_time;

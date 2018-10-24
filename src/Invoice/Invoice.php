@@ -12,136 +12,74 @@ abstract class Invoice
      * @var Guid
      */
     public $message_id;
-    
+
     /**
      * Number of the invoice (sequence number of the invoice)
      * @var string
      */
     public $invoice_number;
-    
-    /**
-     * Mark of business premises
-     *     The number of the original invoice is entered in cases
-     *     of subsequent changes of data on the original invoice
-     *     if the original invoice has been issued via the
-     *     electronic device.
-     * @var int
-     */
-    //public $reference_invoice_invoice_number;
-    
-    /**
-     * Mark of the electronic device
-     *     The number of the original invoice is entered in cases
-     *     of subsequent changes of data on the original invoice
-     *     if the original invoice has been issued via the
-     *     electronic device.
-     * @var int
-     */
-    //public $reference_invoice_business_premise_id;
-    
-    /**
-     * Number of the invoice (sequence number of the invoice)
-     *     The number of the original invoice is entered in cases
-     *     of subsequent changes of data on the original invoice
-     *     if the original invoice has been issued via the
-     *     electronic device.
-     * @var string
-     */
-    //public $reference_invoice_electronic_device_id;
-    
-    /**
-     * Date and time of issuing the invoice (unix timestamp)
-     *     The number of the original invoice is entered in cases
-     *     of subsequent changes of data on the original invoice
-     *     if the original invoice has been issued via the
-     *     electronic device.
-     * @var int
-     */
-    //public $reference_invoice_issue_date_time;
-    
-    /**
-     * Mark of business premises
-     *     The number of the original invoice is entered in cases
-     *     of subsequent changes of data on the original invoice
-     *     if the original invoice has been issued via the
-     *     electronic device.
-     * @var int
-     */
-    //public $reference_sales_book_invoice_number;
-    
-    /**
-     * Mark of the electronic device
-     *     The number of the original invoice is entered in cases
-     *     of subsequent changes of data on the original invoice
-     *     if the original invoice has been issued via the
-     *     electronic device.
-     * @var int
-     */
-    //public $reference_sales_book_business_premise_id;
-    
-    /**
-     * Number of the invoice (sequence number of the invoice)
-     *     The number of the original invoice is entered in cases
-     *     of subsequent changes of data on the original invoice
-     *     if the original invoice has been issued via the
-     *     electronic device.
-     * @var string
-     */
-    //public $reference_sales_book_electronic_device_id;
-    
-    /**
-     * Date and time of issuing the invoice (unix timestamp)
-     *     The number of the original invoice is entered in cases
-     *     of subsequent changes of data on the original invoice
-     *     if the original invoice has been issued via the
-     *     electronic device.
-     * @var int
-     */
-    //public $reference_sales_book_issue_date_time;
-    
+
     /**
      * Value of the invoice (with VAT and discounts)
      * @var float
      */
     public $invoice_amount;
-    
+
     /**
      * Tax number of the person liable
      * @var int
      */
     public $tax_number;
-    
+
     /**
      * Value for payment
      * @var float
      */
     public $payment_amount;
-    
+
     /**
      * Amount of refunds
      * @var float
      */
     public $returns_amount;
-    
+
     /**
      * Array of TaxesPerSeller objects
      * @var array
      */
     public $taxes_per_seller = array();
-    
+
     /**
      * Tax number or identification mark for VAT purposes of the buyer
      * @var string
      */
     public $customer_vat_number;
-    
+
+    /**
+     * Array of reference invoices
+     * @var array
+     */
+    public $reference_invoices = array();
+
+    /**
+     * Array of reference sales books
+     * @var array
+     */
+    public $reference_sales_books = array();
+
+    /**
+     * Date format that will be used for this reference
+     * @var string
+     */
+    public $date_time_format;
+
     /**
      * Potential other marks are entered, which explain in detail the records in
      *     connection with the content of invoices issued and their changes.
      * @var string
      */
     public $special_notes;
-    
+
     /**
      * Create a new Invoice instance
      *
@@ -163,5 +101,90 @@ abstract class Invoice
         $this->invoice_amount = $invoice_amount;
         $this->payment_amount = $payment_amount;
         $this->tax_number     = $tax_number;
+    }
+
+    /**
+     * Set date format that will be used
+     *
+     * @param string $format
+     */
+    public function setDateTimeFormat($format)
+    {
+        $this->date_time_format = $format;
+    }
+
+    /**
+     * Get date format that we will use
+     *
+     * @return string
+     */
+    public function getDateTimeFormat()
+    {
+        return $this->date_time_format;
+    }
+
+    /**
+     * Set special notes
+     *
+     * @param string $notes
+     */
+    public function setSpecialNotes($notes)
+    {
+        $this->special_notes = $notes;
+    }
+
+    /**
+     * Add reference invoice to current invoice
+     *
+     * @param ReferenceInvoice $invoice
+     */
+    public function addReferenceInvoice(ReferenceInvoice $invoice)
+    {
+        array_push($this->reference_invoices, $invoice);
+    }
+
+    /**
+     * Get all the reference invoices that were added to this invoice
+     *
+     * @return array
+     */
+    public function getReferenceInvoices()
+    {
+        return $this->getArrayRepresentation($this->reference_invoices);
+    }
+
+    /**
+     * Set reference salaes book to current invoice
+     *
+     * @param ReferenceSalesBook $book
+     */
+    public function addReferenceSalesBook(ReferenceSalesBook $book)
+    {
+        array_push($this->reference_sales_books, $book);
+    }
+
+    /**
+     * Get all the reference books that were added to this invoice
+     *
+     * @return array
+     */
+    public function getReferenceSalesBooks()
+    {
+        return $this->getArrayRepresentation($this->reference_sales_books);
+    }
+
+    /**
+     * Get array representation of our reference items
+     *
+     * @param  array $data
+     * @return array
+     */
+    private function getArrayRepresentation($data)
+    {
+        return array_map(function (ReferenceInterface $item) {
+            $item->setDateTimeFormat($this->getDateTimeFormat());
+
+            return $item->toArray();
+        }, $data);
     }
 }

@@ -17,7 +17,7 @@ class MovableBusinessPremise extends BusinessPremise
      * @var string
      */
     public $premise_type;
-    
+
     /**
      * Create a new MovableBusinessPremise instance
      *
