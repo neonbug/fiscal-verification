@@ -16,7 +16,7 @@ class ImmovableBusinessPremise extends BusinessPremise
     public $community;
     public $city;
     public $postal_code;
-    
+
     /**
      * Create a new ImmovableBusinessPremise instance
      *

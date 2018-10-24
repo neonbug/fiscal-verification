@@ -13,25 +13,25 @@ class SalesBookInvoice extends Invoice
      * @var string
      */
     public $set_number;
-    
+
     /**
      * Serial number of the pre-numbered invoice book
      * @var string
      */
     public $serial_number;
-    
+
     /**
      * Date and time of issuing the invoice (unix timestamp)
      * @var int
      */
     public $issue_date;
-    
+
     /**
      * Mark of business premises
      * @var string
      */
     public $business_premise_id;
-    
+
     /**
      * Create a new Invoice instance
      *
@@ -64,7 +64,7 @@ class SalesBookInvoice extends Invoice
             $payment_amount,
             $tax_number
         );
-        
+
         $this->set_number          = $set_number;
         $this->serial_number       = $serial_number;
         $this->issue_date          = $issue_date;

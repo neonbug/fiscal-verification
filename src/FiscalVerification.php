@@ -18,16 +18,16 @@ class FiscalVerification
     const URL_PATH_INVOICES       = '/v1/cash_registers/invoices';
     const URL_PATH_INVOICES_BATCH = '/v1/cash_registers_batch/invoices';
     const URL_PATH_REGISTER       = '/v1/cash_registers/invoices/register';
-    
+
     const MESSAGE_HEADER_DATETIME_FORMAT = 'c'; //'Y-m-d\TH:i:sP';
-    
+
     protected $client_key_filename;
     protected $client_key_password;
     protected $ca_public_key_filename;
     protected $base_url;
-    
+
     protected $event_emitter;
-    
+
     /**
      * Create a new FiscalVerification instance
      *
@@ -47,7 +47,7 @@ class FiscalVerification
         $this->ca_public_key_filename = $ca_public_key_filename;
         $this->base_url               = $base_url;
     }
-    
+
     /**
      * Add an external event emitter
      * @param \Evenement\EventEmitterInterface $event_emitter Event emmiter
@@ -56,7 +56,7 @@ class FiscalVerification
     {
         $this->event_emitter = $event_emitter;
     }
-    
+
     /**
      * Generate invoice structure from provided arguments
      *
@@ -100,17 +100,17 @@ class FiscalVerification
                 'IssueDateTime'      => date(self::MESSAGE_HEADER_DATETIME_FORMAT, $invoice->issue_date_time),
                 'TaxesPerSeller'     => array()
             );
-            
+
             if ($invoice->foreign_operator != null) {
                 $data['InvoiceRequest'][$key]['ForeignOperator'] = $invoice->foreign_operator;
             }
-            
+
             if ($invoice->subsequent_submit != null) {
                 $data['InvoiceRequest'][$key]['SubsequentSubmit'] = $invoice->subsequent_submit;
             }
         } elseif ($invoice instanceof SalesBookInvoice) {
             $key = 'SalesBookInvoice';
-            
+
             $data['InvoiceRequest'][$key] = array(
                 'SalesBookIdentifier' => array(
                     'InvoiceNumber' => $invoice->invoice_number,
@@ -127,47 +127,47 @@ class FiscalVerification
                 'TaxesPerSeller'    => array()
             );
         }
-        
+
         if ($invoice->customer_vat_number != null) {
             $data['InvoiceRequest'][$key]['CustomerVATNumber'] = $invoice->customer_vat_number;
         }
-        
+
         if ($invoice->returns_amount != null) {
             $data['InvoiceRequest'][$key]['ReturnsAmount'] = $invoice->returns_amount;
         }
-        
+
         if ($invoice->special_notes != null) {
             $data['InvoiceRequest'][$key]['SpecialNotes'] = $invoice->special_notes;
         }
-        
+
         $taxes_per_seller = array();
         foreach ($invoice->taxes_per_seller as $taxes_per_seller_item) {
             $taxes_per_seller_arr = array();
-            
+
             if ($taxes_per_seller_item->seller_tax_number != null) {
                 $taxes_per_seller_arr['SellerTaxNumber'] = $taxes_per_seller_item->seller_tax_number;
             }
-            
+
             if ($taxes_per_seller_item->other_taxes_amount != null) {
                 $taxes_per_seller_arr['OtherTaxesAmount'] = $taxes_per_seller_item->other_taxes_amount;
             }
-            
+
             if ($taxes_per_seller_item->exempt_vat_taxable_amount != null) {
                 $taxes_per_seller_arr['ExemptVATTaxableAmount'] = $taxes_per_seller_item->exempt_vat_taxable_amount;
             }
-            
+
             if ($taxes_per_seller_item->reverse_vat_taxable_amount != null) {
                 $taxes_per_seller_arr['ReverseVATTaxableAmount'] = $taxes_per_seller_item->reverse_vat_taxable_amount;
             }
-            
+
             if ($taxes_per_seller_item->nontaxable_amount != null) {
                 $taxes_per_seller_arr['NontaxableAmount'] = $taxes_per_seller_item->nontaxable_amount;
             }
-            
+
             if ($taxes_per_seller_item->special_tax_rules_amount != null) {
                 $taxes_per_seller_arr['SpecialTaxRulesAmount'] = $taxes_per_seller_item->special_tax_rules_amount;
             }
-            
+
             if ($taxes_per_seller_item->vat != null) {
                 $formatted_arr = array();
                 foreach ($taxes_per_seller_item->vat as $tax) {
@@ -179,7 +179,7 @@ class FiscalVerification
                 }
                 $taxes_per_seller_arr['VAT'] = $formatted_arr;
             }
-            
+
             if ($taxes_per_seller_item->flat_rate_compensation != null) {
                 $formatted_arr = array();
                 foreach ($taxes_per_seller_item->flat_rate_compensation as $rate) {
@@ -235,7 +235,7 @@ class FiscalVerification
         return $tax_number . date('d.m.Y H:i:s', $issue_date_time) . $invoice_number .
             $business_premise_id . $electronic_device_id . $this->formatNumber($invoice_amount);
     }
-    
+
     /**
      * Signs ZOI using private key
      *
@@ -247,17 +247,17 @@ class FiscalVerification
     public function signZoi($zoi, $encode = true)
     {
         $private_key = $this->getPrivateKey($this->getClientKeyFilename(), $this->getClientKeyPassword());
-        
+
         $signature = '';
         if (!openssl_sign($zoi, $signature, $private_key, 'sha256WithRSAEncryption')) {
             throw new \Exception('Error signing with OpenSSL');
         }
-        
+
         $this->releasePrivateKey($private_key);
-        
+
         return ($encode ? hash('md5', $signature) : $signature);
     }
-    
+
     /**
      * Render provided information as QR code
      *
@@ -276,7 +276,7 @@ class FiscalVerification
             $tax_number .
             date('ymdHis', $issue_date_time);
         $value .= $this->calculateModulo10($value);
-        
+
         $qrCode = new \Endroid\QrCode\QrCode();
         return $qrCode
             ->setText($value)
@@ -287,7 +287,7 @@ class FiscalVerification
             ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
             ->getImage();
     }
-    
+
     /**
      * Generate header using public certificate
      *
@@ -299,24 +299,24 @@ class FiscalVerification
     {
         // base64 encoded X.509 (.CER)
         $parsed_cert = openssl_x509_parse(file_get_contents($this->getClientKeyFilename()));
-        
+
         $subject_name  = $parsed_cert['name'];
         $serial_number = $parsed_cert['serialNumber'];
-        
+
         $issuer_name = implode(', ', array_map(function ($k, $v) {
             return $k . '=' . $v;
         }, array_keys($parsed_cert['issuer']), $parsed_cert['issuer']));
-        
+
         $header = array(
             'alg'          => 'RS256',
             'subject_name' => $subject_name,
             'issuer_name'  => $issuer_name,
             'serial'       => $serial_number
         );
-        
+
         return ($encode ? json_encode($header) : $header);
     }
-    
+
     /**
      * Sign data using private key
      *
@@ -335,27 +335,27 @@ class FiscalVerification
         $request_encoded        = \Base64Url\Base64Url::encode(
             is_array($request)        ? json_encode($request)        : $request
         );
-        
+
         $private_key = $this->getPrivateKey($this->getClientKeyFilename(), $this->getClientKeyPassword());
-        
+
         $data = implode('.', array($request_header_encoded, $request_encoded));
-        
+
         $signature = '';
         if (!openssl_sign($data, $signature, $private_key, 'SHA256')) {
             throw new \Exception('Error signing with OpenSSL');
         }
-        
+
         $this->releasePrivateKey($private_key);
-        
+
         $token = implode('.', array(
             $request_header_encoded,
             $request_encoded,
             \Base64Url\Base64Url::encode($signature)
         ));
-        
+
         return ($encode ? json_encode(array('token' => $token)) : $token);
     }
-    
+
     /**
      * Generate register premise structure from provided arguments
      *
@@ -387,23 +387,23 @@ class FiscalVerification
         $business_premise_id,
         $validity_date,
         BusinessPremise $business_premise,
-        Array $software_suppliers,
+        array $software_suppliers,
         $special_notes = '',
         $close_premise = false,
         $encode = true
     ) {
         $validity_date_formatted = (is_string($validity_date) ? $validity_date :
             date(self::MESSAGE_HEADER_DATETIME_FORMAT /*'Y-m-d'*/, $validity_date));
-        
+
         $software_suppliers_formatted = array();
         foreach ($software_suppliers as $software_supplier) {
             $software_supplier_type = preg_match('/^[0-9]{8}$/', $software_supplier) ?
                 'TaxNumber' : // only for Slo companies
                 'NameForeign'; // only for foreign companies
-            
+
             $software_suppliers_formatted[][$software_supplier_type] = $software_supplier;
         }
-        
+
         $data = array(
             'BusinessPremiseRequest' => array(
                 'Header' => array(
@@ -418,7 +418,7 @@ class FiscalVerification
                 )
             )
         );
-        
+
         if ($business_premise instanceof MovableBusinessPremise) {
             $data['BusinessPremiseRequest']['BusinessPremise']['BPIdentifier']['PremiseType'] =
                 $business_premise->premise_type; // movable business premise; one of: A, B, C
@@ -441,17 +441,17 @@ class FiscalVerification
                 )
             );
         }
-        
+
         if ($close_premise === true) {
             $data['BusinessPremiseRequest']['BusinessPremise']['ClosingTag'] = 'Z'; // optional
         }
         if (mb_strlen($special_notes, 'UTF-8') > 0) {
             $data['BusinessPremiseRequest']['BusinessPremise']['SpecialNotes'] = $special_notes; // optional
         }
-        
+
         return ($encode ? json_encode($data) : $data);
     }
-    
+
     /**
      * Send an echo message
      *
@@ -463,7 +463,7 @@ class FiscalVerification
     public function sendEcho($message, $decode = true)
     {
         $message_formatted = json_encode(array('EchoRequest' => $message));
-        
+
         $retval = $this->send(
             $this->getBaseUrl() . self::URL_PATH_ECHO,
             $this->getClientKeyFilename(),
@@ -471,10 +471,10 @@ class FiscalVerification
             $this->getCaPublicKeyFilename(),
             $message_formatted
         );
-        
+
         return ($decode ? json_decode($retval) : $retval);
     }
-    
+
     /**
      * Send an invoice
      *
@@ -486,7 +486,7 @@ class FiscalVerification
     public function sendInvoice($invoice, $decode = true)
     {
         $invoice_formatted = (is_array($invoice) ? json_encode($invoice) : $invoice);
-        
+
         $retval = $this->send(
             $this->getBaseUrl() . self::URL_PATH_INVOICES,
             $this->getClientKeyFilename(),
@@ -494,10 +494,10 @@ class FiscalVerification
             $this->getCaPublicKeyFilename(),
             $invoice_formatted
         );
-        
+
         return ($decode ? $this->parseResponse($retval) : $retval);
     }
-    
+
     /**
      * Send premise registration
      *
@@ -509,7 +509,7 @@ class FiscalVerification
     public function sendPremise($premise, $decode = true)
     {
         $premise_formatted = (is_array($premise) ? json_encode($premise) : $premise);
-        
+
         $retval = $this->send(
             $this->getBaseUrl() . self::URL_PATH_REGISTER,
             $this->getClientKeyFilename(),
@@ -517,32 +517,32 @@ class FiscalVerification
             $this->getCaPublicKeyFilename(),
             $premise_formatted
         );
-        
+
         return ($decode ? $this->parseResponse($retval) : $retval);
     }
-    
+
     // private/protected methods
-    
+
     protected function getClientKeyFilename()
     {
         return $this->client_key_filename;
     }
-    
+
     protected function getClientKeyPassword()
     {
         return $this->client_key_password;
     }
-    
+
     protected function getCaPublicKeyFilename()
     {
         return $this->ca_public_key_filename;
     }
-    
+
     protected function getBaseUrl()
     {
         return $this->base_url;
     }
-      
+
     protected function getPrivateKey($client_key_filename, $client_key_password)
     {
         $cert = openssl_pkey_get_private(file_get_contents($client_key_filename), $client_key_password);
@@ -551,12 +551,12 @@ class FiscalVerification
         }
         return $cert;
     }
-    
+
     protected function releasePrivateKey($private_key)
     {
         openssl_pkey_free($private_key);
     }
-    
+
     // from https://stackoverflow.com/questions/16965915
     protected function bigNumberHexToDecimal($hex)
     {
@@ -564,13 +564,13 @@ class FiscalVerification
         $hexLen = strlen($hex);
         for ($h=0; $h<$hexLen; $h++) {
             $carry = hexdec($hex[$h]);
-            
+
             for ($i = 0; $i < sizeof($dec); $i++) {
                 $val = $dec[$i] * 16 + $carry;
                 $dec[$i] = $val % 10;
                 $carry = (int) ($val / 10);
             }
-            
+
             while ($carry > 0) {
                 $dec[] = $carry % 10;
                 $carry = (int) ($carry / 10);
@@ -579,7 +579,7 @@ class FiscalVerification
 
         return join('', array_reverse($dec));
     }
-    
+
     // translated from https://github.com/MPrtenjak/SLOTax/blob/master/SharedService/Modulo/Modulo10_Easy.cs
     protected function calculateModulo10($value)
     {
@@ -587,10 +587,10 @@ class FiscalVerification
         for ($i=0; $i<strlen($value); $i++) {
             $sum += intval(substr($value, $i, 1));
         }
-        
+
         return $sum % 10;
     }
-    
+
     protected function send(
         $url,
         $client_key_filename,
@@ -599,9 +599,9 @@ class FiscalVerification
         $message
     ) {
         $this->emitEvent('fiscal-verification.before-send', $message);
-        
+
         $ch = curl_init();
-        
+
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=UTF-8'));
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
@@ -612,58 +612,58 @@ class FiscalVerification
         curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 60);
         //curl_setopt($ch, CURLOPT_SAFE_UPLOAD, 0);
-        
+
         // workaround for double header in response
         curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($url, $header) {
             return strlen($header);
         });
-        
+
         // use TLS 1.2 if available; otherwise, use TLS 1.0
         $ssl_version = defined('CURL_SSLVERSION_TLSv1_2') ? CURL_SSLVERSION_TLSv1_2 : 4 /* CURL_SSLVERSION_TLSv1_0 */;
         curl_setopt($ch, CURLOPT_SSLVERSION, $ssl_version);
-        
+
         // client private certificate
         curl_setopt($ch, CURLOPT_SSLCERT, $client_key_filename);
         curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $client_key_password);
-        
+
         // server's (or its CA) public certificate
         curl_setopt($ch, CURLOPT_CAINFO, $ca_public_key_filename);
-        
+
         // set message
         curl_setopt($ch, CURLOPT_POSTFIELDS, (!is_string($message) ? json_encode($message) : $message));
-        
+
         $response = curl_exec($ch);
         $this->emitEvent('fiscal-verification.after-send', $response);
-        
+
         if ($response === false) {
             //if (curl_errno($ch) == 35) { //handle "Unknown SSL protocol error in connection to" error
                 //let's simply retry, it usually solves this issue
                 $response = curl_exec($ch);
                 $this->emitEvent('fiscal-verification.after-repeat-send', $response);
             //}
-            
+
             if ($response === false) {
                 $error = new \Exception('Curl error', 1, new \Exception(curl_error($ch), curl_errno($ch)));
-                
+
                 $this->emitEvent('fiscal-verification.after-send-error', $error);
-                
+
                 throw $error;
             }
         }
-        
+
         curl_close($ch);
-        
+
         //list($header, $body) = explode("\r\n\r\n", $response, 2);
         $body = $response;
-        
+
         return $body;
     }
-    
+
     protected function formatNumber($val)
     {
         return round($val, 2);
     }
-    
+
     protected function parseResponse($response)
     {
         $obj = json_decode($response);
@@ -671,25 +671,25 @@ class FiscalVerification
             //TODO throw an exception
             return array('error');
         }
-        
+
         $arr = explode('.', $obj->token);
         if (sizeof($arr) != 3) {
             //TODO throw an exception
         }
-        
+
         return array(
             'header'    => \Base64Url\Base64Url::decode($arr[0]),
             'payload'   => \Base64Url\Base64Url::decode($arr[1]),
             'signature' => \Base64Url\Base64Url::decode($arr[2])
         );
     }
-    
+
     protected function emitEvent($event, $message)
     {
         if ($this->event_emitter == null) {
             return;
         }
-        
+
         $this->event_emitter->emit($event, array($message));
     }
 }
