@@ -51,6 +51,7 @@ If you discover any security related issues, please email tadej@ncode.si instead
 ## Credits
 
 - [Tadej Kanižar][link-author]
+- [Marko Žagar](https://github.com/MarkoDevelop)
 
 ## License
 
