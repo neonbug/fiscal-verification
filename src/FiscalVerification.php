@@ -261,6 +261,7 @@ class FiscalVerification
     /**
      * Render provided information as QR code
      *
+     * @param string $image_type      Type of image to return (can be one of: binary, eps, png, svg, debug)
      * @param string $signed_zoi      Signed ZOI
      * @param string $tax_number      Tax number of the person liable
      * @param int    $issue_date_time Date and time of issuing the invoice (unix timestamp)
@@ -270,7 +271,7 @@ class FiscalVerification
      *
      * @return GD resource            Rendered QR code as a GD resource
      */
-    public function renderQrCodeAsImage($signed_zoi, $tax_number, $issue_date_time, $size = 300, $padding = 10)
+    public function renderQrCodeAsImage($image_type, $signed_zoi, $tax_number, $issue_date_time, $size = 300, $padding = 10)
     {
         $value = str_pad($this->bigNumberHexToDecimal($signed_zoi), 39, '0', STR_PAD_LEFT) .
             $tax_number .
@@ -279,13 +280,14 @@ class FiscalVerification
 
         $qrCode = new \Endroid\QrCode\QrCode();
         return $qrCode
+            ->setWriterByName($image_type)
             ->setText($value)
             ->setSize($size)
-            ->setPadding($padding)
-            ->setErrorCorrection(\Endroid\QrCode\QrCode::LEVEL_MEDIUM)
+            ->setMargin($padding)
+            ->setErrorCorrectionLevel(\Endroid\QrCode\ErrorCorrectionLevel::MEDIUM)
             ->setForegroundColor(array('r' => 0,   'g' => 0,   'b' => 0,   'a' => 0))
             ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
-            ->getImage();
+            ->writeString();
     }
 
     /**

@@ -41,9 +41,10 @@ class RenderQrTest extends \PHPUnit_Framework_TestCase
         $fiscal_verification = $this->initFiscalVerification($config);
         $signed_zoi = $this->getTestSignedZoi($fiscal_verification);
         
-        $image = $fiscal_verification->renderQrCodeAsImage($signed_zoi, 12345678, time());
-        $image_width  = imagesx($image);
-        $image_height = imagesy($image);
+        $image = $fiscal_verification->renderQrCodeAsImage('png', $signed_zoi, 12345678, time());
+        $image_gd     = imagecreatefromstring($image);
+        $image_width  = imagesx($image_gd);
+        $image_height = imagesy($image_gd);
         
         $expected_image_size = 300 /* size */ + 20 /* padding */;
         $this->assertEquals($image_width * $image_height, $expected_image_size * $expected_image_size);
@@ -62,9 +63,10 @@ class RenderQrTest extends \PHPUnit_Framework_TestCase
         $fiscal_verification = $this->initFiscalVerification($config);
         $signed_zoi = $this->getTestSignedZoi($fiscal_verification);
         
-        $image = $fiscal_verification->renderQrCodeAsImage($signed_zoi, 12345678, time(), 100);
-        $image_width  = imagesx($image);
-        $image_height = imagesy($image);
+        $image = $fiscal_verification->renderQrCodeAsImage('png', $signed_zoi, 12345678, time(), 100);
+        $image_gd     = imagecreatefromstring($image);
+        $image_width  = imagesx($image_gd);
+        $image_height = imagesy($image_gd);
         
         $expected_image_size = 100 /* size */ + 20 /* padding */;
         $this->assertEquals($image_width * $image_height, $expected_image_size * $expected_image_size);
@@ -83,9 +85,10 @@ class RenderQrTest extends \PHPUnit_Framework_TestCase
         $fiscal_verification = $this->initFiscalVerification($config);
         $signed_zoi = $this->getTestSignedZoi($fiscal_verification);
         
-        $image = $fiscal_verification->renderQrCodeAsImage($signed_zoi, 12345678, time(), 100, 5);
-        $image_width  = imagesx($image);
-        $image_height = imagesy($image);
+        $image = $fiscal_verification->renderQrCodeAsImage('png', $signed_zoi, 12345678, time(), 100, 5);
+        $image_gd     = imagecreatefromstring($image);
+        $image_width  = imagesx($image_gd);
+        $image_height = imagesy($image_gd);
         
         $expected_image_size = 100 /* size */ + 10 /* padding */;
         $this->assertEquals($image_width * $image_height, $expected_image_size * $expected_image_size);
