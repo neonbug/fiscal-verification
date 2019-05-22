@@ -669,7 +669,7 @@ class FiscalVerification
     protected function parseResponse($response)
     {
         $obj = json_decode($response);
-        if ($obj === false) {
+        if ($obj === false || ! property_exists($obj, 'token')) {
             //TODO throw an exception
             return array('error');
         }
