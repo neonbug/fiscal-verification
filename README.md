@@ -36,7 +36,7 @@ $ composer test
 
 - more tests, 
 - better error handling, 
-- implement batch invoives (i.e. /v1/cash_registers_batch/invoices), 
+- implement batch invoices (i.e. /v1/cash_registers_batch/invoices), 
 - a (more robust) system for retrying requests.
 
 ## Contributing
