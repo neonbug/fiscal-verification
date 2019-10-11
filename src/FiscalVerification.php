@@ -28,7 +28,7 @@ class FiscalVerification
 
     protected $event_emitter;
 
-    protected $curlOptions;
+    private $curlOptions;
 
     /**
      * Create a new FiscalVerification instance
@@ -600,6 +600,11 @@ class FiscalVerification
         $this->curlOptions = $curlOptions;
     }
 
+    public function getCurlOptions()
+    {
+        return $this->curlOptions;
+    }
+
     protected function send(
         $url,
         $client_key_filename,
@@ -641,7 +646,9 @@ class FiscalVerification
         // set message
         curl_setopt($ch, CURLOPT_POSTFIELDS, (!is_string($message) ? json_encode($message) : $message));
 
-        $ch = ($this->curlOptions)($ch);
+        if ($this->getCurlOptions()) {
+            $ch = ($this->getCurlOptions())($ch);
+        }
 
         $response = curl_exec($ch);
         $this->emitEvent('fiscal-verification.after-send', $response);
