@@ -635,6 +635,8 @@ class FiscalVerification
         // use TLS 1.2 if available; otherwise, use TLS 1.0
         $ssl_version = defined('CURL_SSLVERSION_TLSv1_2') ? CURL_SSLVERSION_TLSv1_2 : 4 /* CURL_SSLVERSION_TLSv1_0 */;
         curl_setopt($ch, CURLOPT_SSLVERSION, $ssl_version);
+        
+        curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT:!DH');
 
         // client private certificate
         curl_setopt($ch, CURLOPT_SSLCERT, $client_key_filename);
