@@ -427,6 +427,17 @@ class FiscalVerification
             $data['BusinessPremiseRequest']['BusinessPremise']['BPIdentifier']['PremiseType'] =
                 $business_premise->premise_type; // movable business premise; one of: A, B, C
         } elseif ($business_premise instanceof ImmovableBusinessPremise) {
+            $address = array(
+                'Street'      => $business_premise->street,
+                'HouseNumber' => $business_premise->house_number,
+                'Community'   => $business_premise->community,
+                'City'        => $business_premise->city,
+                'PostalCode'  => $business_premise->postal_code
+            );
+            if ($business_premise->house_number_additional !== null && $business_premise->house_number_additional != '') {
+                $address['HouseNumberAdditional'] = $business_premise->house_number_additional;
+            }
+            
             $data['BusinessPremiseRequest']['BusinessPremise']['BPIdentifier'] = array(
                 'RealEstateBP' => array( // immovable business premise
                     'PropertyID' => array(
@@ -434,14 +445,7 @@ class FiscalVerification
                         'BuildingNumber'        => $business_premise->building_number, // int
                         'BuildingSectionNumber' => $business_premise->building_section_number // int
                     ),
-                    'Address' => array(
-                        'Street'                => $business_premise->street,
-                        'HouseNumber'           => $business_premise->house_number,
-                        'HouseNumberAdditional' => $business_premise->house_number_additional, // optional
-                        'Community'             => $business_premise->community,
-                        'City'                  => $business_premise->city,
-                        'PostalCode'            => $business_premise->postal_code
-                    )
+                    'Address' => $address
                 )
             );
         }
