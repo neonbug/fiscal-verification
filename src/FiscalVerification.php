@@ -194,7 +194,7 @@ class FiscalVerification
                 $taxes_per_seller_arr['FlatRateCompensation'] = $formatted_arr;
             }
 
-            $taxes_per_seller[] = $taxes_per_seller_arr;
+            $taxes_per_seller[] = (object)$taxes_per_seller_arr;
         }
 
         $data['InvoiceRequest'][$key]['TaxesPerSeller'] = $taxes_per_seller;
