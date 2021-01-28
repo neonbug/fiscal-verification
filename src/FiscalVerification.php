@@ -562,7 +562,9 @@ class FiscalVerification
 
     protected function releasePrivateKey($private_key)
     {
-        openssl_pkey_free($private_key);
+        if (PHP_MAJOR_VERSION < 8) {
+            openssl_pkey_free($private_key);
+        }
     }
 
     // from https://stackoverflow.com/questions/16965915
