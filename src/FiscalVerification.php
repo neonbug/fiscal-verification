@@ -194,7 +194,7 @@ class FiscalVerification
                 $taxes_per_seller_arr['FlatRateCompensation'] = $formatted_arr;
             }
 
-            $taxes_per_seller[] = $taxes_per_seller_arr;
+            $taxes_per_seller[] = (object)$taxes_per_seller_arr;
         }
 
         $data['InvoiceRequest'][$key]['TaxesPerSeller'] = $taxes_per_seller;
@@ -427,6 +427,17 @@ class FiscalVerification
             $data['BusinessPremiseRequest']['BusinessPremise']['BPIdentifier']['PremiseType'] =
                 $business_premise->premise_type; // movable business premise; one of: A, B, C
         } elseif ($business_premise instanceof ImmovableBusinessPremise) {
+            $address = array(
+                'Street'      => $business_premise->street,
+                'HouseNumber' => $business_premise->house_number,
+                'Community'   => $business_premise->community,
+                'City'        => $business_premise->city,
+                'PostalCode'  => $business_premise->postal_code
+            );
+            if ($business_premise->house_number_additional !== null && $business_premise->house_number_additional != '') {
+                $address['HouseNumberAdditional'] = $business_premise->house_number_additional;
+            }
+            
             $data['BusinessPremiseRequest']['BusinessPremise']['BPIdentifier'] = array(
                 'RealEstateBP' => array( // immovable business premise
                     'PropertyID' => array(
@@ -434,14 +445,7 @@ class FiscalVerification
                         'BuildingNumber'        => $business_premise->building_number, // int
                         'BuildingSectionNumber' => $business_premise->building_section_number // int
                     ),
-                    'Address' => array(
-                        'Street'                => $business_premise->street,
-                        'HouseNumber'           => $business_premise->house_number,
-                        'HouseNumberAdditional' => $business_premise->house_number_additional, // optional
-                        'Community'             => $business_premise->community,
-                        'City'                  => $business_premise->city,
-                        'PostalCode'            => $business_premise->postal_code
-                    )
+                    'Address' => $address
                 )
             );
         }
@@ -635,6 +639,8 @@ class FiscalVerification
         // use TLS 1.2 if available; otherwise, use TLS 1.0
         $ssl_version = defined('CURL_SSLVERSION_TLSv1_2') ? CURL_SSLVERSION_TLSv1_2 : 4 /* CURL_SSLVERSION_TLSv1_0 */;
         curl_setopt($ch, CURLOPT_SSLVERSION, $ssl_version);
+        
+        curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT:!DH');
 
         // client private certificate
         curl_setopt($ch, CURLOPT_SSLCERT, $client_key_filename);
