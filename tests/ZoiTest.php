@@ -80,9 +80,6 @@ class ZoiTest extends BaseTestCase
         $this->assertEquals($ret, 1);
     }
 
-    /**
-     * @expectedExceptionMessageRegExp #Error reading certs.*#
-     */
     public function testPrivateKeyReadFail()
     {
         $this->expectException(Exception::class);
