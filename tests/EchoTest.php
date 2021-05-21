@@ -1,8 +1,8 @@
-<?php namespace Neonbug\FiscalVerification\Tests;
+<?php namespace Neonbug\FiscalVerification\Test;
 
-class EchoTest extends \PHPUnit_Framework_TestCase
+class EchoTest extends BaseTestCase
 {
-    
+
     protected function checkConfig($config)
     {
         return $config['client_key_filename'] != null &&
@@ -14,14 +14,13 @@ class EchoTest extends \PHPUnit_Framework_TestCase
     public function testEcho()
     {
         $message = 'test' . mt_rand(1, 10000);
-        
+
         $config = include('_config.php');
-        
+
         if (!$this->checkConfig($config)) {
             $this->markTestSkipped('Config is empty');
-            return;
         }
-        
+
         $fiscal_verification = new \Neonbug\FiscalVerification\FiscalVerification(
             $config['client_key_filename'],
             $config['client_key_password'],
@@ -29,7 +28,7 @@ class EchoTest extends \PHPUnit_Framework_TestCase
             $config['base_url']
         );
         $response = $fiscal_verification->sendEcho($message);
-        
+
         $this->assertJsonStringEqualsJsonString(
             json_encode($response),
             json_encode(array('EchoResponse' => $message))

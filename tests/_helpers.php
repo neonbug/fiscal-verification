@@ -1,16 +1,21 @@
 <?php
+
+use JsonSchema\Constraints\Factory;
+use JsonSchema\SchemaStorage;
+use JsonSchema\Validator;
+
 function validateAgainstSchema($schema_name, $data)
 {
-    $retriever = new JsonSchema\Uri\UriRetriever();
-    $schema = $retriever->retrieve('file://' . __DIR__ . '/assets/' . $schema_name);
-    
-    $ref_resolver = new JsonSchema\RefResolver(new JsonSchema\Uri\UriRetriever());
-    $ref_resolver->resolve($schema);
- 
-    $validator = new JsonSchema\Validator();
-    $validator->check($data, $schema);
-    
-    return array('valid' => $validator->isValid(), 'errors' => $validator->getErrors());
+    $schemaStorage = new SchemaStorage();
+
+    $schemaStorage->addSchema('file://' . __DIR__ . '/assets/' . $schema_name);
+
+    $jsonValidator = new Validator( new Factory($schemaStorage));
+
+    $jsonValidator->validate($data, $schemaStorage);
+
+
+    return array('valid' => $jsonValidator->isValid(), 'errors' => $jsonValidator->getErrors());
 }
 
 function base64UrlEncode($data)
