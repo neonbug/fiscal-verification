@@ -1,5 +1,13 @@
 <?php namespace Neonbug\FiscalVerification;
 
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\Color\ColorInterface;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelMedium;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Writer\Result\ResultInterface;
+use Endroid\QrCode\Writer\WriterInterface;
+use Endroid\QrCode\Encoding\Encoding;
 use Neonbug\FiscalVerification\BusinessPremise\BusinessPremise;
 use Neonbug\FiscalVerification\BusinessPremise\ImmovableBusinessPremise;
 use Neonbug\FiscalVerification\BusinessPremise\MovableBusinessPremise;
@@ -263,33 +271,46 @@ class FiscalVerification
     /**
      * Render provided information as QR code
      *
-     * @param string $image_type      Type of image to return (can be one of: binary, eps, png, svg, debug)
+     * @param WriterInterface $image_type    Type of image to return
+     * @param string $value                  Value of the QR code
+     * @param int    $size                   Size of rendered QR (without padding); used for width and height
+     * @param int    $padding                Padding, adds to rendered image's width and height;
+     *                                       used for left/right/top/bottom padding
+     *
+     * @return ResultInterface result         Return prepared QRcode object
+     */
+    public function renderQrCodeAsImage($image_type, $value, $size = 300, $margin = 10)
+    {
+        return Builder::create()
+            ->writer($image_type)
+            ->writerOptions([])
+            ->data($value)
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(new ErrorCorrectionLevelMedium())
+            ->size($size)
+            ->margin($margin)
+            ->backgroundColor(new Color(255, 255, 255 , 0))
+            ->foregroundColor(new Color(0, 0, 0 , 0))
+            ->build();
+    }
+
+    /**
+     * Render provided information as QR code
+     *
      * @param string $signed_zoi      Signed ZOI
      * @param string $tax_number      Tax number of the person liable
      * @param int    $issue_date_time Date and time of issuing the invoice (unix timestamp)
-     * @param int    $size            Size of rendered QR (without padding); used for width and height
-     * @param int    $padding         Padding, adds to rendered image's width and height;
-     *                                used for left/right/top/bottom padding
      *
-     * @return GD resource            Rendered QR code as a GD resource
+     * @return string                 Data that should be displayed as QR code
      */
-    public function renderQrCodeAsImage($image_type, $signed_zoi, $tax_number, $issue_date_time, $size = 300, $padding = 10)
+    public function calculateQrCodeData($signed_zoi, $tax_number, $issue_date_time)
     {
         $value = str_pad($this->bigNumberHexToDecimal($signed_zoi), 39, '0', STR_PAD_LEFT) .
             $tax_number .
             date('ymdHis', $issue_date_time);
         $value .= $this->calculateModulo10($value);
 
-        $qrCode = new \Endroid\QrCode\QrCode();
-        return $qrCode
-            ->setWriterByName($image_type)
-            ->setText($value)
-            ->setSize($size)
-            ->setMargin($padding)
-            ->setErrorCorrectionLevel(\Endroid\QrCode\ErrorCorrectionLevel::MEDIUM)
-            ->setForegroundColor(array('r' => 0,   'g' => 0,   'b' => 0,   'a' => 0))
-            ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
-            ->writeString();
+        return $value;
     }
 
     /**
@@ -437,7 +458,7 @@ class FiscalVerification
             if ($business_premise->house_number_additional !== null && $business_premise->house_number_additional != '') {
                 $address['HouseNumberAdditional'] = $business_premise->house_number_additional;
             }
-            
+
             $data['BusinessPremiseRequest']['BusinessPremise']['BPIdentifier'] = array(
                 'RealEstateBP' => array( // immovable business premise
                     'PropertyID' => array(
@@ -641,7 +662,7 @@ class FiscalVerification
         // use TLS 1.2 if available; otherwise, use TLS 1.0
         $ssl_version = defined('CURL_SSLVERSION_TLSv1_2') ? CURL_SSLVERSION_TLSv1_2 : 4 /* CURL_SSLVERSION_TLSv1_0 */;
         curl_setopt($ch, CURLOPT_SSLVERSION, $ssl_version);
-        
+
         curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT:!DH');
 
         // client private certificate
