@@ -61,5 +61,5 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [ico-travis]: https://img.shields.io/travis/neonbug/fiscal-verification/master.svg?style=flat-square
 
 [link-packagist]: https://packagist.org/packages/neonbug/fiscal-verification
-[link-travis]: https://travis-ci.org/neonbug/fiscal-verification
+[link-travis]: https://travis-ci.com/neonbug/fiscal-verification
 [link-author]: https://github.com/tadejkan
