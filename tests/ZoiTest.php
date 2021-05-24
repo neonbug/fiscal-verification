@@ -1,6 +1,8 @@
-<?php namespace Neonbug\FiscalVerification\Tests;
+<?php namespace Neonbug\FiscalVerification\Test;
 
-class ZoiTest extends \PHPUnit_Framework_TestCase
+use Exception;
+
+class ZoiTest extends BaseTestCase
 {
 
     protected function checkConfig($config)
@@ -19,7 +21,6 @@ class ZoiTest extends \PHPUnit_Framework_TestCase
 
         if (!$this->checkConfig($config)) {
             $this->markTestSkipped('Config is empty');
-            return;
         }
 
         $fiscal_verification = new \Neonbug\FiscalVerification\FiscalVerification(
@@ -54,7 +55,6 @@ class ZoiTest extends \PHPUnit_Framework_TestCase
 
         if (!$this->checkConfig($config)) {
             $this->markTestSkipped('Config is empty');
-            return;
         }
 
         $fiscal_verification = new \Neonbug\FiscalVerification\FiscalVerification(
@@ -80,17 +80,15 @@ class ZoiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($ret, 1);
     }
 
-    /**
-     * @expectedException              Exception
-     * @expectedExceptionMessageRegExp #Error reading certs.*#
-     */
     public function testPrivateKeyReadFail()
     {
+        $this->expectException(Exception::class);
+        $this->expectErrorMessageMatches('#Error reading certs.*#');
+
         $config = include('_config.php');
 
         if (!$this->checkConfig($config)) {
             $this->markTestSkipped('Config is empty');
-            return;
         }
 
         $fiscal_verification = new \Neonbug\FiscalVerification\FiscalVerification(
@@ -98,6 +96,7 @@ class ZoiTest extends \PHPUnit_Framework_TestCase
             'wrongpass',
             $config['ca_public_key_filename'],
             $config['base_url']
+
         );
 
         $test_zoi = '1234567801.01.2015 01:00:00123premise1edevice130.41';

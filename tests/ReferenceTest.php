@@ -1,9 +1,9 @@
-<?php namespace Neonbug\FiscalVerification\Tests;
+<?php namespace Neonbug\FiscalVerification\Test;
 
 use Neonbug\FiscalVerification\Invoice\ReferenceInvoice;
 use Neonbug\FiscalVerification\Invoice\ReferenceSalesBook;
 
-class ReferenceTest extends \PHPUnit_Framework_TestCase
+class ReferenceTest extends BaseTestCase
 {
     protected function getTestHeader($fiscal_verification)
     {
@@ -107,7 +107,6 @@ class ReferenceTest extends \PHPUnit_Framework_TestCase
 
         if (!$this->checkConfig($config)) {
             $this->markTestSkipped('Config is empty');
-            return;
         }
 
         $fiscal_verification = new \Neonbug\FiscalVerification\FiscalVerification(
@@ -157,7 +156,8 @@ class ReferenceTest extends \PHPUnit_Framework_TestCase
             '00000000-0000-0000-0000-000000000000' ?
             'API returned an error: ' . json_encode($invoice_response->InvoiceResponse->Error) :
             null);
-        $this->assertTrue($error_message === null, $error_message);
+
+        $this->assertNull($error_message);
     }
 
     public function testReferenceSalesBook()
@@ -167,7 +167,6 @@ class ReferenceTest extends \PHPUnit_Framework_TestCase
 
         if (!$this->checkConfig($config)) {
             $this->markTestSkipped('Config is empty');
-            return;
         }
 
         $fiscal_verification = new \Neonbug\FiscalVerification\FiscalVerification(
@@ -217,7 +216,8 @@ class ReferenceTest extends \PHPUnit_Framework_TestCase
             '00000000-0000-0000-0000-000000000000' ?
             'API returned an error: ' . json_encode($invoice_response->InvoiceResponse->Error) :
             null);
-        $this->assertTrue($error_message === null, $error_message);
+
+        $this->assertNull($error_message);
     }
 
     protected function sendTestInvoice($fiscal_verification, $header, $invoice)
